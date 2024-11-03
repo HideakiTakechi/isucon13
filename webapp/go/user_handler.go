@@ -113,6 +113,20 @@ func getIconHandler(c echo.Context) error {
 		}
 	}
 
+	// アイコン画像のSHA256ハッシュを計算
+	hash := sha256.Sum256(image)
+	iconHash := hex.EncodeToString(hash[:])
+
+	// If-None-Matchヘッダの値を取得
+	ifNoneMatch := c.Request().Header.Get("If-None-Match")
+
+	// If-None-Matchがアイコンのハッシュ値と一致する場合、304を返す
+	if ifNoneMatch == `"`+iconHash+`"` {
+		return c.NoContent(http.StatusNotModified)
+	}
+
+	// 一致しない場合は画像とETagヘッダを返す
+	c.Response().Header().Set("ETag", `"`+iconHash+`"`)
 	return c.Blob(http.StatusOK, "image/jpeg", image)
 }
 
