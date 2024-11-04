@@ -6,7 +6,8 @@
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
 	"features": {
 		"ghcr.io/hspaans/devcontainer-features/ansible-lint:1": {},
-		"ghcr.io/devcontainers-extra/features/ansible:2": {}
+		"ghcr.io/devcontainers-extra/features/ansible:2": {},
+		"ghcr.io/devcontainers/features/go:1": {}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
