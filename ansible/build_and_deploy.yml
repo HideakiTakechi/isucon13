@@ -1,0 +1,30 @@
+---
+- name: Build Go application locally and deploy to remote
+  hosts: localhost
+  tasks:
+    - name: Build Go application
+      ansible.builtin.command:
+        cmd: make
+        chdir: ../webapp/go
+      register: build_result
+      ignore_errors: no
+
+    - name: Check if build was successful
+      ansible.builtin.fail:
+        msg: "Build failed. Check Go installation and code."
+      when: build_result.rc != 0
+
+- name: Copy built binary to remote server and restart service
+  hosts: webserver
+  tasks:
+    - name: Transfer binary to remote server
+      ansible.builtin.copy:
+        src: ../webapp/go/isupipe
+        dest: /home/isucon/webapp/go/isupipe
+        mode: '0755'
+
+    - name: Restart isupipe-go.service
+      ansible.builtin.systemd:
+        name: isupipe-go.service
+        state: restarted
+      become: true
