@@ -20,6 +20,8 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	echolog "github.com/labstack/gommon/log"
+
+	"github.com/kaz/pprotein/integration/standalone"
 )
 
 const (
@@ -112,6 +114,12 @@ func initializeHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to initialize: "+err.Error())
 	}
 
+	go func() {
+		if _, err := http.Get("https://bookish-guacamole-6vv6rgp5gc4gwp-9000.app.github.dev/api/group/collect"); err != nil {
+			log.Printf("failed to communicate with pprotein: %v", err)
+		}
+	}()
+
 	c.Request().Header.Add("Content-Type", "application/json;charset=utf-8")
 	return c.JSON(http.StatusOK, InitializeResponse{
 		Language: "golang",
@@ -183,6 +191,8 @@ func main() {
 	e.GET("/api/payment", GetPaymentResult)
 
 	e.HTTPErrorHandler = errorResponseHandler
+
+	go standalone.Integrate(":19000")
 
 	// DB接続
 	conn, err := connectDB(e.Logger)
